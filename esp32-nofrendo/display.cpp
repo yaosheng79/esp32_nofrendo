@@ -47,7 +47,7 @@ Arduino_ST7789 *gfx = new Arduino_ST7789(bus, -1 /* RST */, 1 /* rotation */, tr
 #define TFT_BRIGHTNESS 180 /* 0 - 255 */
 
 // TTGO T-DISPLAY.
-// #define TFT_BL 12
+#define TFT_BL 12
 Arduino_DataBus *bus = new Arduino_ESP32SPI(13 /* DC */, -1 /* CS */, 15 /* SCK */, 2 /* MOSI */, -1 /* MISO */);
 Arduino_ST7789 *gfx = new Arduino_ST7789(bus, 5 /* RST */, 2 /* rotation */, true /* IPS */, 240, 240, 0, 0, 0, 80);
 
@@ -138,10 +138,10 @@ extern "C" void display_write_frame(const uint8_t *data[])
     gfx->startWrite();
     if (w < 480)
     {
-        gfx->writeAddrWindow(frame_x, frame_y, frame_width, frame_height);
         for (int32_t i = 0; i < NES_SCREEN_HEIGHT; i++)
         {
-            gfx->writeIndexedPixels((uint8_t *)(data[i] + frame_x_offset), myPalette, frame_line_pixels);
+            gfx->writeAddrWindow(frame_x, frame_y+i, frame_width, frame_height);
+            gfx->writeIndexedPixels((uint8_t *)(data[i] + frame_x_offset), myPalette, 256);
         }
     }
     else
