@@ -64,7 +64,7 @@ void setup()
                 {
                     foundRom = true;
                     char fullFilename[256];
-                    sprintf(fullFilename, "%s%s", FSROOT, filename);
+                    sprintf(fullFilename, "%s/%s", FSROOT, filename);
                     Serial.println(fullFilename);
                     argv[0] = fullFilename;
                     break;

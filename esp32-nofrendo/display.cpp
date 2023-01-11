@@ -47,9 +47,9 @@ Arduino_ST7789 *gfx = new Arduino_ST7789(bus, -1 /* RST */, 1 /* rotation */, tr
 #define TFT_BRIGHTNESS 180 /* 0 - 255 */
 
 // TTGO T-DISPLAY.
-#define TFT_BL 4
-Arduino_DataBus *bus = new Arduino_ESP32SPI(16 /* DC */, 5 /* CS */, 18 /* SCK */, 19 /* MOSI */, -1 /* MISO */);
-Arduino_ST7789 *gfx = new Arduino_ST7789(bus, 23 /* RST */, 2 /* rotation */, true /* IPS */, 135 /* width */, 240 /* height */, 53 /* col offset 1 */, 40 /* row offset 1 */, 52 /* col offset 2 */, 40 /* row offset 2 */);
+// #define TFT_BL 12
+Arduino_DataBus *bus = new Arduino_ESP32SPI(13 /* DC */, -1 /* CS */, 15 /* SCK */, 2 /* MOSI */, -1 /* MISO */);
+Arduino_ST7789 *gfx = new Arduino_ST7789(bus, 5 /* RST */, 2 /* rotation */, true /* IPS */, 240, 240, 0, 0, 0, 80);
 
 /* ILI9341 */
 //#define TFT_BL 14
@@ -81,9 +81,8 @@ extern void display_begin()
 {      
     gfx->begin();
     //bg_color = gfx->color565(24, 28, 24); // DARK DARK GREY
-    bg_color = gfx->color565(0, 0, 0);
+    bg_color = gfx->color565(255, 0, 0);
     gfx->fillScreen(bg_color);
-    gfx->setRotation(1);
 #ifdef TFT_BL
     // turn display backlight on
     ledcAttachPin(TFT_BL, 1);     // assign TFT_BL pin to channel 1
@@ -111,10 +110,9 @@ extern "C" void display_init()
         }
         else
         {
-            // TTGO.
             frame_x = 0;
-            frame_x_offset = 8;
-            frame_width = w+16;
+            frame_x_offset = (NES_SCREEN_WIDTH - w) / 2;
+            frame_width = w;
             frame_height = NES_SCREEN_HEIGHT;
             frame_line_pixels = frame_width;
         }
@@ -132,26 +130,19 @@ extern "C" void display_init()
     //Serial.print("gfx->width:");
     //Serial.println(w);
     //Serial.print("gfx->height:");
-    //Serial.println(h);    
+    //Serial.println(h);
 }
 
 extern "C" void display_write_frame(const uint8_t *data[])
-{    
+{
     gfx->startWrite();
-    // TTGO.
-    if (w == 240 && h==135){
-      gfx->writeAddrWindow(0, 0, frame_width, frame_height);
-      for (int32_t i = 0; i < NES_SCREEN_HEIGHT; i++)
-      {
-        if ((i % 2) == 1)
-          gfx->writeIndexedPixels((uint8_t *)(data[i] + frame_x_offset), myPalette, frame_line_pixels);
-      }
-    }else if (w < 480){            
+    if (w < 480)
+    {
         gfx->writeAddrWindow(frame_x, frame_y, frame_width, frame_height);
         for (int32_t i = 0; i < NES_SCREEN_HEIGHT; i++)
         {
             gfx->writeIndexedPixels((uint8_t *)(data[i] + frame_x_offset), myPalette, frame_line_pixels);
-        }      
+        }
     }
     else
     {
